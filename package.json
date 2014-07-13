@@ -5,7 +5,7 @@
   "main": "simulator.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublish": "coffee -c simulator.coffee"
+    "prepublish": "coffee -cm simulator.coffee"
   },
   "repository": {
     "type": "git",
