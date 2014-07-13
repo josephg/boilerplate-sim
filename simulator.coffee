@@ -207,6 +207,9 @@ class Simulator
 
     thisDelta
 
+# Exported for convenience.
+Simulator.parseXY = parseXY
+
 
 if typeof module != 'undefined'
   module.exports = Simulator
