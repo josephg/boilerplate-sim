@@ -1,0 +1,31 @@
+{
+  "name": "boilerplate-sim",
+  "version": "1.0.0",
+  "description": "",
+  "main": "simulator.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublish": "coffee -c simulator.coffee"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/josephg/boilerplate-sim.git"
+  },
+  "keywords": [
+    "boilerplate",
+    "turing"
+  ],
+  "author": "",
+  "contributors": [
+    "Joseph Gentle <me@josephg.com>",
+    "Jeremy Apthorp <nornagon@nornagon.net>"
+  ],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/josephg/boilerplate-sim/issues"
+  },
+  "homepage": "https://github.com/josephg/boilerplate-sim",
+  "devDependencies": {
+    "coffee-script": "^1.7.1"
+  }
+}
