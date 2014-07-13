@@ -26,22 +26,22 @@
 
 cardinal_dirs = [[0,1],[0,-1],[1,0],[-1,0]]
 fill = (initial_square, f) ->
-	visited = {}
-	visited["#{initial_square.x},#{initial_square.y}"] = true
-	to_explore = [initial_square]
-	hmm = (x,y) ->
-		k = "#{x},#{y}"
-		if not visited[k]
-			visited[k] = true
-			to_explore.push {x,y}
-	while n = to_explore.shift()
-		ok = f n.x, n.y, hmm
-		if ok
-			hmm n.x+1, n.y
-			hmm n.x-1, n.y
-			hmm n.x, n.y+1
-			hmm n.x, n.y-1
-	return
+  visited = {}
+  visited["#{initial_square.x},#{initial_square.y}"] = true
+  to_explore = [initial_square]
+  hmm = (x,y) ->
+    k = "#{x},#{y}"
+    if not visited[k]
+      visited[k] = true
+      to_explore.push {x,y}
+  while n = to_explore.shift()
+    ok = f n.x, n.y, hmm
+    if ok
+      hmm n.x+1, n.y
+      hmm n.x-1, n.y
+      hmm n.x, n.y+1
+      hmm n.x, n.y-1
+  return
 
 parseXY = (k) ->
   [x,y] = k.split /,/
@@ -75,6 +75,8 @@ class Simulator
       delete @grid[k]
       @delta.changed[k] = null
   get: (x,y) -> @grid["#{x},#{y}"]
+
+  getGrid: -> @grid
 
   tryMove: (points, dx, dy) ->
     dx = if dx < 0 then -1 else if dx > 0 then 1 else 0
@@ -207,4 +209,6 @@ class Simulator
 
 
 if typeof module != 'undefined'
-	module.exports = Simulator
+  module.exports = Simulator
+else
+  this.Simulator = Simulator
