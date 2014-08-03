@@ -4,6 +4,8 @@
 # 2. Copy it to the clipboard
 # 3. pbpaste | coffee makedata.coffee > foo.json
 
+Simulator = require '../simulator'
+
 isEmpty = (obj) ->
   for k of obj
     return false
@@ -14,8 +16,6 @@ process.stdin.on 'data', (data) ->
   input += data.toString 'utf8'
 
 process.stdin.on 'end', ->
-  Simulator = require './simulator'
-
   grid = JSON.parse input
   delete grid.tw
   delete grid.th
