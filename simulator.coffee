@@ -50,15 +50,8 @@ parseXY = (k) ->
 sign = (x) -> if x > 0 then 1 else if x < 0 then -1 else 0
 
 class Simulator
-  constructor: (@grid) ->
-    @grid ||= {}
-    @engines = {}
-    for k,v of @grid
-      if v in ['positive','negative']
-        {x,y} = parseXY k
-        @engines[k] = {x,y}
-    #console.log "Initiating #{Object.keys(@engines).length} engines..."
-    @delta = {changed:{}, sound:{}}
+  constructor: (grid) ->
+    @setGrid grid
 
   set: (x, y, v) ->
     k = "#{x},#{y}"
@@ -77,6 +70,16 @@ class Simulator
   get: (x,y) -> @grid["#{x},#{y}"]
 
   getGrid: -> @grid
+
+  setGrid: (grid) ->
+    @grid = grid || {}
+    @engines = {}
+    for k,v of @grid
+      if v in ['positive', 'negative']
+        {x,y} = parseXY k
+        @engines[k] = {x,y}
+    # Delta bankruptcy.
+    @delta = {changed:{}, sound:{}}
 
   tryMove: (points, dx, dy) ->
     dx = if dx < 0 then -1 else if dx > 0 then 1 else 0
