@@ -33,7 +33,6 @@ process.stdin.on 'end', ->
     break if seenState[key]
     seenState[key] = true
 
-    delta = s.step()
-    break if isEmpty delta.changed
+    s.step()
 
   return
