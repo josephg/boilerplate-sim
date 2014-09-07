@@ -109,7 +109,7 @@ class Simulator
       fill v, (x, y, hmm) =>
         cell = @get x, y
         cell = 'nothing' if x is v.x and y is v.y
-        if cell in ['nothing', 'thinshuttle', 'thinsolid']
+        if cell in ['nothing', 'thinshuttle', 'thinsolid', 'buttondown']
           pressure["#{x},#{y}"] = (pressure["#{x},#{y}"] ? 0) + direction
 
           # Propogate pressure through bridges
@@ -121,7 +121,7 @@ class Simulator
                 pressure["#{_x},#{_y}"] = (pressure["#{_x},#{_y}"] ? 0) + direction
                 _x += dx; _y += dy
               
-              if c in ['nothing', 'thinshuttle', 'thinsolid']
+              if c in ['nothing', 'thinshuttle', 'thinsolid', 'buttondown']
                 hmm _x, _y
 
           return true
@@ -160,7 +160,7 @@ class Simulator
         cell = 'nothing' if x is v.x and y is v.y
 
         switch cell
-          when 'nothing', 'thinshuttle', 'thinsolid'
+          when 'nothing', 'thinshuttle', 'thinsolid', 'buttondown'
             for [dx,dy] in cardinal_dirs
               _x = x + dx; _y = y + dy
 
@@ -177,7 +177,7 @@ class Simulator
                 if (s = getShuttle _x, _y)
                   s.force.x += dx * direction
                   s.force.y += dy * direction
-                else if c in ['nothing', 'thinshuttle', 'thinsolid']
+                else if c in ['nothing', 'thinshuttle', 'thinsolid', 'buttondown']
                   hmm _x, _y
 
 
