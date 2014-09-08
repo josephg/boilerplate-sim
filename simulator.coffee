@@ -219,6 +219,54 @@ class Simulator
   releaseShuttle: ->
     @held = null
 
+
+  # ***** Drawing *****
+  colors =
+    bridge: '#2E96D6'
+    negative: '#D65729'
+    nothing: '#FFFFFF'
+    positive: '#5CCC5C'
+    shuttle: '#9328BD'
+    solid: '#09191B'
+    thinshuttle: '#D887F8'
+    thinsolid: '#B5B5B5'
+    buttondown: '#FFA93D'
+    buttonup: '#CC7B00'
+
+  darkColors =
+    bridge: '#487693'
+    negative: '#814B37'
+    nothing: '#7D7D7D'
+    positive: '#4D8F4D'
+    shuttle: '#604068'
+    solid: '#706F76'
+    thinshuttle: '#8E56A4'
+    thinsolid: '#7D7D7D'
+    buttondown: 'rgb(255,169,61)'
+    buttonup: 'rgb(171,99,18)'
+
+  drawCanvas: (ctx, size, worldToScreen) ->
+    worldToScreen ||= (tx, ty) -> {px:(tx+1) * size, py:(ty+1) * size}
+
+    # Draw the tiles
+    pressure = @getPressure()
+    for k,v of @grid
+      {x:tx,y:ty} = parseXY k
+      {px, py} = worldToScreen tx, ty
+
+      ctx.fillStyle = colors[v]
+      ctx.fillRect px, py, size, size
+
+      downCells = ['nothing', 'buttondown']
+      v2 = @get(tx,ty-1)
+      if v in downCells and v != v2
+        ctx.fillStyle = darkColors[v2 ? 'solid']
+        ctx.fillRect px, py, size, size*0.3
+
+      if (p = pressure[k]) and p != 0
+        ctx.fillStyle = if p < 0 then 'rgba(255,0,0,0.2)' else 'rgba(0,255,0,0.15)'
+        ctx.fillRect px, py, size, size
+
 # Exported for convenience.
 Simulator.parseXY = parseXY
 
