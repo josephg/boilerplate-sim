@@ -89,6 +89,9 @@ class Simulator
     isMe = (qx,qy) ->
       return true for {x,y} in points when x == qx and y == qy
       false
+    if @held
+      for {x,y} in points
+        return false if @held.x is x and @held.y is y
     for {x,y} in points when not isMe(x+dx,y+dy)
       if @get(x+dx, y+dy) isnt 'nothing'
         return false
@@ -209,6 +212,12 @@ class Simulator
     @delta = {changed:{}, sound:{}}
 
     thisDelta
+
+  holdShuttle: ({x,y}) ->
+    @held = {x,y}
+
+  releaseShuttle: ->
+    @held = null
 
 # Exported for convenience.
 Simulator.parseXY = parseXY
