@@ -230,9 +230,9 @@ class Simulator
     for k, v of @grid
       {x,y} = parseXY k
       left = x if left is null || x < left
-      right = x if right is null || x > right
+      right = x+1 if right is null || x >= right
       top = y if top is null || y < top
-      bottom = y if bottom is null || y > bottom
+      bottom = y+1 if bottom is null || y >= bottom
 
     {top, left, bottom, right}
 
