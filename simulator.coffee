@@ -73,8 +73,8 @@ class Simulator
 
   setGrid: (grid) ->
     @grid = grid || {}
-    delete grid.tw
-    delete grid.th
+    delete @grid.tw
+    delete @grid.th
     @engines = {}
     for k,v of @grid
       if v in ['positive', 'negative']
