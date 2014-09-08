@@ -221,6 +221,19 @@ class Simulator
 
 
   # ***** Drawing *****
+  boundingBox: ->
+    # calculate the bounding box
+    top = left = bottom = right = null
+
+    for k, v of @grid
+      {x,y} = parseXY k
+      left = x if left is null || x < left
+      right = x if right is null || x > right
+      top = y if top is null || y < top
+      bottom = y if bottom is null || y > bottom
+
+    {top, left, bottom, right}
+
   colors =
     bridge: '#2E96D6'
     negative: '#D65729'
@@ -246,7 +259,7 @@ class Simulator
     buttonup: 'rgb(171,99,18)'
 
   drawCanvas: (ctx, size, worldToScreen) ->
-    worldToScreen ||= (tx, ty) -> {px:(tx+1) * size, py:(ty+1) * size}
+    worldToScreen ||= (tx, ty) -> {px:tx * size, py:ty * size}
 
     # Draw the tiles
     pressure = @getPressure()
