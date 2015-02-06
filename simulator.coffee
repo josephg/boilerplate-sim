@@ -83,9 +83,8 @@ class Simulator
     # Delta bankruptcy.
     @delta = {changed:{}, sound:{}}
 
+
   tryMove: (points, dx, dy) ->
-    dx = if dx < 0 then -1 else if dx > 0 then 1 else 0
-    dy = if dy < 0 then -1 else if dy > 0 then 1 else 0
     throw new Error('one at a time, fellas') if dx and dy
     return unless dx or dy
     isMe = (qx,qy) ->
@@ -94,18 +93,31 @@ class Simulator
     if @held
       for {x,y} in points
         return false if @held.x is x and @held.y is y
-    for {x,y} in points when not isMe(x+dx,y+dy)
-      if @get(x+dx, y+dy) isnt 'nothing'
-        return false
 
-    shuttle = {}
-    for {x,y} in points
-      shuttle["#{x},#{y}"] = @get x, y
-      @set x, y, 'nothing'
-    for {x,y} in points
-      @set x+dx, y+dy, shuttle["#{x},#{y}"]
+    moved = no
+    while dx || dy
+      ddx = sign dx
+      ddy = sign dy
 
-    true
+      for {x,y} in points when not isMe(x+ddx,y+ddy)
+        return moved if @get(x+ddx, y+ddy) isnt 'nothing'
+          
+      shuttle = {}
+      for {x,y} in points
+        shuttle["#{x},#{y}"] = @get x, y
+        @set x, y, 'nothing'
+      for p in points
+        {x,y} = p
+        @set x+ddx, y+ddy, shuttle["#{x},#{y}"]
+        p.x += ddx
+        p.y += ddy
+
+      dx -= ddx
+      dy -= ddy
+
+      moved = yes
+
+    moved
 
   getPressure: ->
     pressure = {}
