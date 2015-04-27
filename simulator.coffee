@@ -55,31 +55,50 @@ class Simulator
 
   set: (x, y, v) ->
     k = "#{x},#{y}"
+    @engines = null
     if v?
       @grid[k] = v
       @delta.changed[k] = v
-
-      delete @engines[k]
-      if v in ['positive', 'negative']
-        @engines[k] = {x,y}
     else
-      if @grid[k] in ['positive', 'negative']
-        delete @engines[k]
       delete @grid[k]
       @delta.changed[k] = null
   get: (x,y) -> @grid["#{x},#{y}"]
 
   getGrid: -> @grid
 
+  findEngines: ->
+    return if @engines
+    @engines = []
+    engineGrid = {}
+    for k,v of @grid when v in ['positive', 'negative'] and !engineGrid[k]
+      {x,y} = parseXY k
+      e =
+        grid: {}
+        pressure: 0
+        root: {x, y}
+
+      size = 0
+      fill {x,y}, (x, y) =>
+        k = "#{x},#{y}"
+        if @grid[k] is v
+          size++
+
+          engineGrid[k] = e
+          e.grid[k] = true
+          yes
+        else
+          no
+
+      e.pressure = if v is 'positive' then size else -size
+      @engines.push e
+    return
+
   setGrid: (grid) ->
     @grid = grid || {}
     delete @grid.tw
     delete @grid.th
-    @engines = {}
-    for k,v of @grid
-      if v in ['positive', 'negative']
-        {x,y} = parseXY k
-        @engines[k] = {x,y}
+    @engines = null
+
     # Delta bankruptcy.
     @delta = {changed:{}, sound:{}}
 
@@ -120,14 +139,16 @@ class Simulator
     moved
 
   getPressure: ->
+    @findEngines()
     pressure = {}
-    for k,v of @engines
-      direction = if 'positive' is @get v.x, v.y then 1 else -1
-      fill v, (x, y, hmm) =>
-        cell = @get x, y
-        cell = 'nothing' if x is v.x and y is v.y
-        if cell in ['nothing', 'thinshuttle', 'thinsolid', 'buttondown']
-          pressure["#{x},#{y}"] = (pressure["#{x},#{y}"] ? 0) + direction
+    for e in @engines
+      fill e.root, (x, y, hmm) =>
+        k = "#{x},#{y}"
+        return true if e.grid[k] # Flood fill through the engine, ignoring it entirely.
+
+        cell = @grid[k]
+        if cell in ['nothing', 'thinshuttle', 'thinsolid']
+          pressure["#{x},#{y}"] = (pressure["#{x},#{y}"] ? 0) + e.pressure
 
           # Propogate pressure through bridges
           for [dx,dy] in cardinal_dirs
@@ -135,10 +156,10 @@ class Simulator
 
             if @get(_x, _y) is 'bridge'
               while (c = @get _x, _y) is 'bridge'
-                pressure["#{_x},#{_y}"] = (pressure["#{_x},#{_y}"] ? 0) + direction
+                pressure["#{_x},#{_y}"] = (pressure["#{_x},#{_y}"] ? 0) + e.pressure
                 _x += dx; _y += dy
               
-              if c in ['nothing', 'thinshuttle', 'thinsolid', 'buttondown']
+              if c in ['nothing', 'thinshuttle', 'thinsolid']
                 hmm _x, _y
 
           return true
@@ -170,20 +191,22 @@ class Simulator
     #  {x,y} = parseXY k
     #  getShuttle x, y
 
-    for k,v of @engines
-      direction = if 'positive' is @get v.x, v.y then 1 else -1
-      fill v, (x, y, hmm) =>
-        cell = @get x, y
-        cell = 'nothing' if x is v.x and y is v.y
+    @findEngines()
+    for e in @engines
+      fill e.root, (x, y, hmm) =>
+        k = "#{x},#{y}"
+        return true if e.grid[k] # Flood fill through the engine, ignoring it entirely.
+
+        cell = @grid[k]
 
         switch cell
-          when 'nothing', 'thinshuttle', 'thinsolid', 'buttondown'
+          when 'nothing', 'thinshuttle', 'thinsolid'
             for [dx,dy] in cardinal_dirs
               _x = x + dx; _y = y + dy
 
               if (s = getShuttle _x, _y)
-                s.force.x += dx * direction
-                s.force.y += dy * direction
+                s.force.x += dx * e.pressure
+                s.force.y += dy * e.pressure
 
               else if @get(_x, _y) is 'bridge'
                 _x += dx; _y += dy
@@ -192,9 +215,9 @@ class Simulator
                 
                 # And now its not a bridge...
                 if (s = getShuttle _x, _y)
-                  s.force.x += dx * direction
-                  s.force.y += dy * direction
-                else if c in ['nothing', 'thinshuttle', 'thinsolid', 'buttondown']
+                  s.force.x += dx * e.pressure
+                  s.force.y += dy * e.pressure
+                else if c in ['nothing', 'thinshuttle', 'thinsolid']
                   hmm _x, _y
 
 
@@ -257,7 +280,6 @@ class Simulator
     solid: '#09191B'
     thinshuttle: '#D887F8'
     thinsolid: '#B5B5B5'
-    buttondown: '#FFA93D'
     buttonup: '#CC7B00'
 
   darkColors =
@@ -269,7 +291,6 @@ class Simulator
     solid: '#706F76'
     thinshuttle: '#8E56A4'
     thinsolid: '#7D7D7D'
-    buttondown: 'rgb(255,169,61)'
     buttonup: 'rgb(171,99,18)'
 
   drawCanvas: (ctx, size, worldToScreen) ->
@@ -283,12 +304,6 @@ class Simulator
 
       ctx.fillStyle = colors[v]
       ctx.fillRect px, py, size, size
-
-      downCells = ['nothing', 'buttondown']
-      v2 = @get(tx,ty-1)
-      if v in downCells and v != v2
-        ctx.fillStyle = darkColors[v2 ? 'solid']
-        ctx.fillRect px, py, size, size*0.3
 
       if (p = pressure[k]) and p != 0
         ctx.fillStyle = if p < 0 then 'rgba(255,0,0,0.2)' else 'rgba(0,255,0,0.15)'
