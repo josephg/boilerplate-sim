@@ -144,10 +144,9 @@ class Simulator
     for e in @engines
       fill e.root, (x, y, hmm) =>
         k = "#{x},#{y}"
-        return true if e.grid[k] # Flood fill through the engine, ignoring it entirely.
 
         cell = @grid[k]
-        if cell in ['nothing', 'thinshuttle', 'thinsolid']
+        if e.grid[k] or cell in ['nothing', 'thinshuttle', 'thinsolid']
           pressure["#{x},#{y}"] = (pressure["#{x},#{y}"] ? 0) + e.pressure
 
           # Propogate pressure through bridges
@@ -195,12 +194,9 @@ class Simulator
     for e in @engines
       fill e.root, (x, y, hmm) =>
         k = "#{x},#{y}"
-        return true if e.grid[k] # Flood fill through the engine, ignoring it entirely.
-
         cell = @grid[k]
 
-        switch cell
-          when 'nothing', 'thinshuttle', 'thinsolid'
+        if e.grid[k] or cell in ['nothing', 'thinshuttle', 'thinsolid']
             for [dx,dy] in cardinal_dirs
               _x = x + dx; _y = y + dy
 
